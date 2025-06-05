@@ -9,7 +9,7 @@ async def predict_with_file(file: UploadFile = File(...)):
     contents = await file.read()
     
     try:
-        df = run_etl(contents)
+        df = await run_etl(contents)
     except Exception as e:
         return {"error": f"Erro ao processar o arquivo CSV: {str(e)}"}
     
@@ -33,10 +33,3 @@ async def predict_with_file(file: UploadFile = File(...)):
         "result_forecast": result_forecast, 
         "result_lstm": result_lstm
         }
-
-
-# async def predict_with_file(file: UploadFile = File(...)):
-#     contents = await file.read()
-#     df = await run_etl(contents)
-#     result = predict_lstm(df)
-#     return {"model": "LSTM", "prediction": result}
