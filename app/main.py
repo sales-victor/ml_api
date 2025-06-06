@@ -1,6 +1,6 @@
 from fastapi import FastAPI, File, UploadFile
-from app.etl import run_etl
-from app.models.models import predict_lstm
+from etl import run_etl
+from models.models import predict_lstm
 
 app = FastAPI()
 
@@ -14,7 +14,7 @@ async def predict_with_file(file: UploadFile = File(...)):
         return {"error": f"Erro ao processar o arquivo CSV: {str(e)}"}
     
     try:
-        result_lstm = "predict_lstm(df)"
+        result_lstm = predict_lstm(df)
     except Exception as e:
         return {"error": f"Erro ao executar a predição: {str(e)}"}
     

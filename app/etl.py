@@ -148,7 +148,11 @@ async def run_etl(raw_data: bytes,  keep_intermediates: bool = False) -> pd.Data
             *[f'MFR_{w}' for w in windows],
         ]
         df.drop(columns=[col for col in intermediates if col in df.columns], inplace=True)
-    
+
+    #Dropando valores infinitos e nulos
+    df.replace([np.inf, -np.inf], np.nan, inplace=True)
+    df.dropna(inplace=True)
+        
     # print(df.columns)
     # print(df)
     return df
