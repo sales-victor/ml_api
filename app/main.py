@@ -1,15 +1,16 @@
 from fastapi import FastAPI, File, UploadFile
 from etl import run_etl
-from models.models import predict_lstm
+from dataframe import get_historical_data
+from models.lstm import predict_lstm
 
 app = FastAPI()
 
-@app.post("/predict")
-async def predict_with_file(file: UploadFile = File(...)):
-    contents = await file.read()
+@app.get("/predict")
+async def predict_with_file():
+    contents = await get_historical_data()
     
     try:
-        df = await run_etl(contents)
+        df = await run_etl(contents, keep_intermediates=True)
     except Exception as e:
         return {"error": f"Erro ao processar o arquivo CSV: {str(e)}"}
     

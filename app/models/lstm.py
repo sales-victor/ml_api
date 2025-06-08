@@ -19,13 +19,15 @@ scaler_close = MinMaxScaler()
 NUM_FEATURES = 50  # você pode ajustar esse valor conforme desejado
 
 # Função para processar e prever
-def fazer_previsao(df: pd.DataFrame):
+def predict_lstm(df: pd.DataFrame):
     from sklearn.feature_selection import SelectKBest, f_classif
     from sklearn.metrics import classification_report, accuracy_score, confusion_matrix, ConfusionMatrixDisplay
 
     df = df.copy()
-    df.drop('Open Time', axis=1, inplace=True)
-    df.drop('Close Time', axis=1, inplace=True)
+    print(df.columns)
+
+    df.drop(columns=['Open Time', 'Close Time'], inplace=True, errors='ignore')
+
 
     X = scaler_X.fit_transform(df)
 
@@ -74,7 +76,9 @@ def fazer_previsao(df: pd.DataFrame):
     image_base64 = base64.b64encode(buf.read()).decode('utf-8')
 
     pred = pred_class.tolist()
+    pred_pro = pred_prob.tolist()
     return {
+        "pred_prob": pred_pro[-1],
         "prediction": pred[-1],
         "classification": classification,
         "accuracy": accuracy,
