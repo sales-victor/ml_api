@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 # Uso da função
 symbol = "BTCUSDT"
 interval = "1h"  # Intervalo de 1 hora
-total_rows=3000
+total_rows=2000
 
 async def get_historical_data( ):
     base_url = "https://api.binance.com"
@@ -87,10 +87,3 @@ async def get_historical_data( ):
     print(f"Coleta finalizada! Total de registros obtidos: {len(final_df)}")
 
     return final_df
-
-
-
-
-# # Salvando os dados em CSV
-# historical_data.to_csv("dataset_btc-usd_1h.csv", index=False)
-# print(historical_data)
