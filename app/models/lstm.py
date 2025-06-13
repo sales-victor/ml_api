@@ -58,7 +58,7 @@ def predict_lstm(df: pd.DataFrame):
     pred_class = (pred_prob > 0.5).astype(int)
     print(pred_class)
 
-        # Salvar o último ponto para previsão futura
+    # Salvar o último ponto para previsão futura
     last_row = df.iloc[[-1]]  # Última linha como DataFrame
     X_last = scaler_X.transform(last_row)
     X_last_scaled = scaler.transform(X_last)

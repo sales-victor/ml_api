@@ -4,6 +4,7 @@ import numpy as np
 import io
 import base64
 import matplotlib.pyplot as plt
+from sklearn.feature_selection import SelectKBest, f_classif
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.metrics import (
     classification_report,
@@ -12,59 +13,85 @@ from sklearn.metrics import (
     ConfusionMatrixDisplay,
 )
 
-# Load the bundled scaler + model
-_bundle        = joblib.load('models/xgboost.pkl')
-_xgb_model     = _bundle.get('model', _bundle)
-_xgb_scaler    = _bundle.get('scaler', None)
-_feature_names = _bundle.get('feature_names', None)
+NUM_FEATURES = 50
 
-# For creating the binary class labels
-_close_scaler = MinMaxScaler()
+# Load the bundled RandomForestClassifier
+xgboost_model = joblib.load('models/xgboost_model.pkl')
+
+# For generating true-up/down labels
+scaler_X = MinMaxScaler()
+scaler_close = MinMaxScaler()
 
 def predict_xgboost(df: pd.DataFrame):
-    dfc = df.copy()
+     # 1) Build true labels exactly like LSTM did
+    df = df.copy()
+
+    df.drop(columns=['Open Time', 'Close Time'], inplace=True, errors='ignore')
+
     
-    # ---- 1) Build true labels exactly as your LSTM did ----
-    # scale the raw Close series 0–1
-    close_vals = _close_scaler.fit_transform(dfc[['Close']]).flatten()
-    # 1 if next-close > current-close else 0
-    y_true = (np.roll(close_vals, -1) > close_vals).astype(int)
+    X = scaler_X.fit_transform(df)
+
+    # Criar y_class: 1 se o próximo valor de close subir, 0 se cair
+    close = scaler_close.fit_transform(df[['Close']]).flatten()
+
+    y_class = (np.roll(close, -1) > close).astype(int)
+    # X = X[:-1]
+    # y_class = y_class[:-1]
+
+    # 1) Padronizar os dados
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+
+    selector = SelectKBest(score_func=f_classif, k=NUM_FEATURES)
+    X_selected = selector.fit_transform(X_scaled, y_class)
+   
+    selected_indices = selector.get_support(indices=True)
+    selected_feature_names = df.columns[selected_indices]
+    print(f"Features selecionadas: {list(selected_feature_names)}")
+
+    # X_last = X_selected[-1]
+    # X_lstm = np.reshape(X_last, (1, 1, X_selected.shape[1]))
+
+    X_xgboost_model = X_selected
+    pred_prob = xgboost_model.predict_proba(X_xgboost_model)[:, 1]  
+    print(pred_prob)
+    pred_class = (pred_prob >= 0.5).astype(int)
+    print(pred_class)
     
-    # ---- 2) Prepare features for inference ----
-    # drop time/meta columns
-    dfc.drop(columns=['Open Time', 'Close Time'], inplace=True, errors='ignore')
-    # select only training‐time features if recorded
-    X = dfc[_feature_names] if _feature_names else dfc
-    # apply saved scaler if it exists
-    X_scaled = _xgb_scaler.transform(X) if _xgb_scaler else X.values
-    
-    # ---- 3) Inference ----
-    # probabilities (if classifier supports it)
-    try:
-        proba = _xgb_model.predict_proba(X_scaled)[:, 1]
-    except AttributeError:
-        proba = _xgb_model.predict(X_scaled).astype(float)
-    preds = _xgb_model.predict(X_scaled)
-    
-    # ---- 4) Classification metrics + confusion matrix plot ----
-    cls_report = classification_report(y_true, preds, digits=4, output_dict=True)
-    acc        = accuracy_score(y_true, preds)
-    cm         = confusion_matrix(y_true, preds)
-    disp       = ConfusionMatrixDisplay(cm, display_labels=["Caiu", "Subiu"])
+    # Salvar o último ponto para previsão futura
+    last_row = df.iloc[[-1]]  # Última linha como DataFrame
+    X_last = scaler_X.transform(last_row)
+    X_last_scaled = scaler.transform(X_last)
+    X_last_selected = selector.transform(X_last_scaled)
+    X_last_xgboost_model = X_last_selected.reshape(1, -1)
+
+    future_prob = xgboost_model.predict_proba(X_last_xgboost_model)[:, 1][0]
+    future_class = int(future_prob > 0.5)
+
+    # Para calcular métricas de classificação
+    classification = classification_report(y_class, pred_class, digits=4, output_dict=True)
+    accuracy = accuracy_score(y_class, pred_class)
+    cm = confusion_matrix(y_class, pred_class)
+    disp = ConfusionMatrixDisplay(cm, display_labels=["Caiu", "Subiu"])
     disp.plot()
     
-    # dump the figure to a PNG‐buffer and base64‐encode it
+    # Salva em buffer de bytes
     buf = io.BytesIO()
-    plt.savefig(buf, format='png', bbox_inches='tight')
+    plt.savefig(buf, format='png')
     plt.close()
     buf.seek(0)
-    cm_base64 = base64.b64encode(buf.read()).decode('utf-8')
-    
-    # ---- 5) Return exactly the same keys as your LSTM version ----
+
+    # Codifica em base64 para retorno via JSON
+    image_base64 = base64.b64encode(buf.read()).decode('utf-8')
+
+    pred = pred_class.tolist()
+    pred_pro = pred_prob.tolist()
     return {
-        "pred_prob":       float(proba[-1]),
-        "prediction":      int(preds[-1]),
-        "classification":  cls_report,
-        "accuracy":        acc,
-        "confusion_matrix": cm_base64
+        # "pred_prob": pred_pro[-1],
+        # "prediction": pred[-1],
+        "pred_prob": float(future_prob),
+        "prediction": int(future_class), 
+        "classification": classification,
+        "accuracy": accuracy,
+        "confusion_matrix": image_base64
     }

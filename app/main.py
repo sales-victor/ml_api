@@ -4,9 +4,9 @@ from dataframe import get_historical_data
 from models.lstm import predict_lstm
 from models.xgboost import predict_xgboost
 from models.rforest import predict_rforest
-from models.lstm import predict_lstm,predict_next_lstm
+# from models.lstm import predict_lstm,predict_next_lstm
 from fastapi.middleware.cors import CORSMiddleware
-import pandas as pd
+# import pandas as pd
 
 
 app = FastAPI()

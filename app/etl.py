@@ -12,21 +12,21 @@ async def run_etl(dataframe : pd.DataFrame,keep_intermediates: bool = False) -> 
     :return: DataFrame com indicadores calculados.
     
     """
-    print("Executando ETL...")
-    print()
+    #print("Executando ETL...")
+    #print()
     # df = pd.read_csv('dataset_btc-usd_1h.csv', parse_dates=True, index_col=0)
     df = dataframe.copy()
     # df = pd.read_csv(io.StringIO(raw_data.decode('utf-8')))
     windows = [7, 14, 28, 56, 112]
 
     # SMA and EMA
-    print("SMA and EMA")
+    #print("SMA and EMA")
     for w in windows:
         df[f'SMA{w}'] = df['Close'].rolling(window=w).mean()
         df[f'EMA{w}'] = df['Close'].ewm(span=w, adjust=False).mean()
 
     # MACD
-    print("MACD")
+    #print("MACD")
     macd_configs = [
         (14, 28, 7),
         (28, 56, 14),
@@ -41,8 +41,8 @@ async def run_etl(dataframe : pd.DataFrame,keep_intermediates: bool = False) -> 
         df[hist_col] = df[macd_col] - df[signal_col]
 
     # RSI
-    print("df['Close'].diff()", df[['Close']].diff())
-    print("RSI")
+    #print("df['Close'].diff()", df[['Close']].diff())
+    #print("RSI")
     delta = df['Close'].diff()
     gain = delta.clip(lower=0)
     loss = -delta.clip(upper=0)
@@ -54,7 +54,7 @@ async def run_etl(dataframe : pd.DataFrame,keep_intermediates: bool = False) -> 
 
     # ADX +DI -DI
     # Compute TR, +DM, -DM once
-    print("ADX +DI -DI")
+    #print("ADX +DI -DI")
     df['TR'] = np.maximum(df['High'] - df['Low'],
                           np.maximum((df['High'] - df['Close'].shift()).abs(),
                                      (df['Low'] - df['Close'].shift()).abs()))
@@ -73,7 +73,7 @@ async def run_etl(dataframe : pd.DataFrame,keep_intermediates: bool = False) -> 
         df[f'ADX{w}'] = df[f'DX{w}'].rolling(window=w).mean()
 
     # Bollinger Bands
-    print("Bollinger Bands")
+    #print("Bollinger Bands")
     for w in windows:
         df[f'std{w}'] = df['Close'].rolling(window=w).std()
         df[f'UpperBand{w}'] = df[f'SMA{w}'] + 2 * df[f'std{w}']
@@ -81,7 +81,7 @@ async def run_etl(dataframe : pd.DataFrame,keep_intermediates: bool = False) -> 
 
     # ATR
     # Recalculate TR (already computed but recalculated here for clarity)
-    print("ATR")
+    #print("ATR")
     df['TR'] = np.maximum(df['High'] - df['Low'],
                           np.maximum((df['High'] - df['Close'].shift()).abs(),
                                      (df['Low'] - df['Close'].shift()).abs()))
@@ -89,29 +89,29 @@ async def run_etl(dataframe : pd.DataFrame,keep_intermediates: bool = False) -> 
         df[f'ATR{w}'] = df['TR'].rolling(window=w).mean()
 
     # Rolling Std Dev of Returns (Realized Volatility)
-    print("Rolling Std Dev of Returns (Realized Volatility)")
+    #print("Rolling Std Dev of Returns (Realized Volatility)")
     df['Return'] = df['Close'].pct_change()
     for w in windows:
         df[f'RollingStd{w}'] = df['Return'].rolling(window=w).std()
 
     # On-Balance Volume (OBV)
-    print("On-Balance Volume (OBV)")
+    #print("On-Balance Volume (OBV)")
     df['OBV_change'] = (np.sign(df['Close'].diff()) * df['Volume']).fillna(0)
     df['OBV'] = df['OBV_change'].cumsum()
     for w in windows:
         df[f'OBV{w}'] = df['OBV_change'].rolling(window=w).sum()
 
     # Volume Moving Average & Volume Spikes
-    print("Volume Moving Average & Volume Spikes")
+    #print("Volume Moving Average & Volume Spikes")
     for w in windows:
         df[f'Vol_MA{w}'] = df['Volume'].rolling(window=w).mean()
 
     # Taker Buy Volume Ratio
-    print("Taker Buy Volume Ratio")
+    #print("Taker Buy Volume Ratio")
     df['TakerBuyRatio'] = df['Taker Buy Base Asset Volume'] / df['Volume']
 
     # Money Flow Index (MFI)
-    print("Money Flow Index (MFI)")
+    #print("Money Flow Index (MFI)")
     df['TypicalPrice'] = (df['High'] + df['Low'] + df['Close']) / 3
     df['MoneyFlow'] = df['TypicalPrice'] * df['Volume']
     df['TP_diff'] = df['TypicalPrice'].diff()
@@ -124,16 +124,16 @@ async def run_etl(dataframe : pd.DataFrame,keep_intermediates: bool = False) -> 
         df[f'MFI{w}'] = 100 - (100 / (1 + df[f'MFR_{w}']))
 
     # Avg Trade Size
-    print("Avg Trade Size")
+    #print("Avg Trade Size")
     df['AvgTradeSize'] = df['Volume'] / df['Number of Trades']
 
     # Rolling Price-Volume Correlation
-    print("Rolling Price-Volume Correlation")
+    #print("Rolling Price-Volume Correlation")
     for w in windows:
         df[f'RollingCorr{w}'] = df['Return'].rolling(window=w).corr(df['Volume'])
 
     # Oscilador Estocástico
-    print("Oscilador Estocástico")
+    #print("Oscilador Estocástico")
     for w in windows:
         low = df['Low'].rolling(window=w).min()
         high = df['High'].rolling(window=w).max()
@@ -141,13 +141,13 @@ async def run_etl(dataframe : pd.DataFrame,keep_intermediates: bool = False) -> 
         df[f'%D{w}'] = df[f'%K{w}'].rolling(window=3).mean()
 
     # Linha de Acumulação/Distribuição (A/D)
-    print("Linha de Acumulação/Distribuição (A/D)")
+    #print("Linha de Acumulação/Distribuição (A/D)")
     df['MoneyFlowMultiplier'] = ((df['Close'] - df['Low']) - (df['High'] - df['Close'])) / (df['High'] - df['Low'])
     df['MoneyFlowVolume'] = df['MoneyFlowMultiplier'] * df['Volume']
     df['AD'] = df['MoneyFlowVolume'].cumsum()
 
     # Fluxo de Dinheiro Chaikin (CMF)
-    print("Fluxo de Dinheiro Chaikin (CMF)")
+    #print("Fluxo de Dinheiro Chaikin (CMF)")
     mfv = ((df['Close'] - df['Low']) - (df['High'] - df['Close'])) / (df['High'] - df['Low']) * df['Volume']
     df['CMF'] = mfv.rolling(window=20).sum() / df['Volume'].rolling(window=20).sum()
 
@@ -170,11 +170,11 @@ async def run_etl(dataframe : pd.DataFrame,keep_intermediates: bool = False) -> 
         ]
         df.drop(columns=[col for col in intermediates if col in df.columns], inplace=True)
 
-    print("FINALIZANDO ETL")
+    #print("FINALIZANDO ETL")
     #Dropando valores infinitos e nulos
     df.replace([np.inf, -np.inf], np.nan, inplace=True)
     df.dropna(inplace=True)
         
-    print(df.columns)
-    print(df)
+    #print(df.columns)
+    #print(df)
     return df
