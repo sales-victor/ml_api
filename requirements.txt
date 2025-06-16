@@ -46,7 +46,7 @@ pydantic==1.10.13
 typing_extensions==4.5.0
 typing-inspection==0.4.1
 anyio==3.7.1
-starlette==0.26.1
+starlette>=0.40.0,<0.47.0
 click==8.2.1
 colorama==0.4.6
 h11==0.14.0
