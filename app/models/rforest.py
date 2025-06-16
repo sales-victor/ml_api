@@ -22,7 +22,7 @@ random_forest = joblib.load('models/random_forest.pkl')
 scaler_X = MinMaxScaler()
 scaler_close = MinMaxScaler()
 
-def predict_rforest(df: pd.DataFrame):
+def predict_rforest(df: pd.DataFrame, treshlod: float):
     # 1) Build true labels exactly like LSTM did
     df = df.copy()
 
@@ -55,7 +55,7 @@ def predict_rforest(df: pd.DataFrame):
     X_random_forest = X_selected
     pred_prob = random_forest.predict_proba(X_random_forest)[:, 1]  
     print(pred_prob)
-    pred_class = (pred_prob >= 0.5).astype(int)
+    pred_class = (pred_prob >= treshlod).astype(int)
     print(pred_class)
     
     # Salvar o último ponto para previsão futura
@@ -66,7 +66,7 @@ def predict_rforest(df: pd.DataFrame):
     X_last_random_forest = X_last_selected.reshape(1, -1)
 
     future_prob = random_forest.predict_proba(X_last_random_forest)[:, 1][0]
-    future_class = int(future_prob > 0.5)
+    future_class = int(future_prob > treshlod)
 
     # Para calcular métricas de classificação
     classification = classification_report(y_class, pred_class, digits=4, output_dict=True)

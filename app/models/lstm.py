@@ -21,7 +21,7 @@ scaler_close = MinMaxScaler()
 NUM_FEATURES = 50  # você pode ajustar esse valor conforme desejado
 
 # Função para processar e prever
-def predict_lstm(df: pd.DataFrame):
+def predict_lstm(df: pd.DataFrame, treshlod: float):
     df = df.copy()
     print(df.columns)
 
@@ -55,7 +55,7 @@ def predict_lstm(df: pd.DataFrame):
 
     pred_prob = lstm_model.predict(X_lstm).flatten()
     print(pred_prob)
-    pred_class = (pred_prob > 0.5).astype(int)
+    pred_class = (pred_prob > treshlod).astype(int)
     print(pred_class)
 
     # Salvar o último ponto para previsão futura
@@ -67,7 +67,7 @@ def predict_lstm(df: pd.DataFrame):
 
     # Previsão do próximo movimento
     future_prob = lstm_model.predict(X_last_lstm).flatten()[0]
-    future_class = int(future_prob > 0.5)
+    future_class = int(future_prob > treshlod)
 
     # Para calcular métricas de classificação
     classification = classification_report(y_class, pred_class, digits=4, output_dict=True)

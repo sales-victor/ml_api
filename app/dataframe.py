@@ -5,10 +5,10 @@ from datetime import datetime, timedelta
 
 # Uso da função
 symbol = "BTCUSDT"
-interval = "1h"  # Intervalo de 1 hora
 total_rows=2000
 
-async def get_historical_data( ):
+async def get_historical_data(interval: str):
+    # interval = "1h"  # Intervalo de 1 hora
     base_url = "https://api.binance.com"
     endpoint = "/api/v3/klines"
 
@@ -20,6 +20,9 @@ async def get_historical_data( ):
     all_data = []
     collected_rows = 0
     max_retries = 3  # Limite de tentativas caso a API não retorne dados
+
+    print(f"Interval: {interval}")
+    print(f"Tamanhos dos dataframes em all_data: {[df.shape for df in all_data]}")
 
     while collected_rows < total_rows:
         print(f"Buscando dados... Total coletado: {collected_rows} linhas")
@@ -77,6 +80,8 @@ async def get_historical_data( ):
 
         # Aguarda 2 segundos para evitar rate limit
         time.sleep(2)
+
+  
 
     # Concatenando todos os DataFrames
     final_df = pd.concat(all_data, ignore_index=True)

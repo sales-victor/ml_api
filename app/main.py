@@ -26,9 +26,9 @@ app.add_middleware(
     allow_headers=["*"],  # permite todos os headers
 )
 
-@app.get("/predict")
-async def predict_with_file():
-    contents = await get_historical_data()
+@app.get("/predict/{interval}/{treshlod}")
+async def predict_with_file(interval: str, treshlod: float):
+    contents = await get_historical_data(interval)
     # contents = pd.read_csv('dataset_btc-usd_1h.csv', parse_dates=True, index_col=0)
     
     try:
@@ -38,21 +38,21 @@ async def predict_with_file():
     
     # LSTM prediction
     try:
-        result_lstm = predict_lstm(df)
-        # result_lstm_last = predict_next_lstm(df)
-        # result_lstm = predict_next_lstm(df)
+        result_lstm = predict_lstm(df, treshlod)
+        # result_lstm_last = predict_next_lstm(df, treshlod)
+        # result_lstm = predict_next_lstm(df, treshlod)
     except Exception as e:
         return {"error": f"Erro ao executar a predição: {str(e)}"}
     
     # XGBoost prediction
     try:
-        result_xgb = predict_xgboost(df)
+        result_xgb = predict_xgboost(df, treshlod)
     except Exception as e:
        return {"error": f"Erro ao executar XGBoost: {str(e)}"}
 
     # Random Forest prediction
     try:
-        result_rf = predict_rforest(df)
+        result_rf = predict_rforest(df, treshlod)
     except Exception as e:
         return {"error": f"Erro ao executar Random Forest: {str(e)}"}
 
