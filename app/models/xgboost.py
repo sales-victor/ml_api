@@ -18,7 +18,7 @@ NUM_FEATURES = 50
 
 # Load the bundled RandomForestClassifier
 base_dir = os.path.dirname(os.path.abspath(__file__))
-model_path = os.path.join(base_dir, "xgboost_model.pkl")
+model_path = os.path.join(base_dir, "xgboost_model2.pkl")
 
 xgboost_model = joblib.load(model_path)
 
