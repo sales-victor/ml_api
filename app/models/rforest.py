@@ -18,7 +18,9 @@ NUM_FEATURES = 50
 
 # Load the bundled RandomForestClassifier
 base_dir = os.path.dirname(os.path.abspath(__file__))
-model_path = os.path.join(base_dir, "xgboost_model.pkl")
+model_path = os.path.join(base_dir, "random_forest.pkl")
+
+random_forest = joblib.load(model_path)
 
 # For generating true-up/down labels
 scaler_X = MinMaxScaler()
