@@ -2,6 +2,7 @@ import joblib
 import pandas as pd
 import numpy as np
 import io
+import os
 import base64
 import matplotlib.pyplot as plt
 from sklearn.feature_selection import SelectKBest, f_classif
@@ -16,7 +17,10 @@ from sklearn.metrics import (
 NUM_FEATURES = 50
 
 # Load the bundled RandomForestClassifier
-xgboost_model = joblib.load('models/xgboost_model.pkl')
+base_dir = os.path.dirname(os.path.abspath(__file__))
+model_path = os.path.join(base_dir, "xgboost_model.pkl")
+
+xgboost_model = joblib.load(model_path)
 
 # For generating true-up/down labels
 scaler_X = MinMaxScaler()
