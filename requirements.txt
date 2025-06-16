@@ -49,5 +49,6 @@ joblib==1.3.2
 
 # Machine Learning
 tensorflow==2.15.0
+xgboost==1.7.6
 
 
