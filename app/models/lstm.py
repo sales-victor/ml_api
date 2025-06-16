@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import io
+import os
 import base64
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
@@ -10,7 +11,9 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import classification_report, accuracy_score, confusion_matrix, ConfusionMatrixDisplay
 
 # Carregar o modelo treinado
-lstm_model = load_model('models/lstm_model.h5')
+# lstm_model = load_model('models/lstm_model.h5')
+base_dir = os.path.dirname(os.path.abspath(__file__))  # Caminho até o arquivo lstm.py
+model_path = os.path.join(base_dir, "lstm_model.h5")
 
 
 # Normalizadores
