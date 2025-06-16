@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 import io
 import base64
-import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.feature_selection import SelectKBest, f_classif
 from tensorflow.keras.models import load_model
