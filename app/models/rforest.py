@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import io
 import base64
+import matplotlib.pyplot as plt
 from sklearn.feature_selection import SelectKBest, f_classif
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.metrics import (
