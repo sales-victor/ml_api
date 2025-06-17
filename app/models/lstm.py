@@ -15,6 +15,8 @@ from sklearn.metrics import classification_report, accuracy_score, confusion_mat
 base_dir = os.path.dirname(os.path.abspath(__file__))  # Caminho até o arquivo lstm.py
 model_path = os.path.join(base_dir, "lstm_model.h5")
 
+lstm_model = load_model(model_path, compile=False)
+
 
 # Normalizadores
 scaler_X = MinMaxScaler()
