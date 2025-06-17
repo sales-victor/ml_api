@@ -12,15 +12,15 @@ from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
 
 # Permitir origens específicas (exemplo: localhost frontend)
-origins = [
-    "http://localhost:4200",  # exemplo: Angular rodando na porta 4200
-    "http://127.0.0.1:4200",
-    # você pode adicionar outras origens aqui
-]
+# origins = [
+#     "http://localhost:4200",  # exemplo: Angular rodando na porta 4200
+#     "http://127.0.0.1:4200",
+#     # você pode adicionar outras origens aqui
+# ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,  # ou use ["*"] para liberar todas as origens (não recomendado para produção)
+    allow_origins=["*"],  # ou use ["*"] para liberar todas as origens (não recomendado para produção)
     allow_credentials=True,
     allow_methods=["*"],  # permite GET, POST, PUT, DELETE, OPTIONS, etc
     allow_headers=["*"],  # permite todos os headers
