@@ -30,7 +30,9 @@ jobs:
       uses: docker/build-push-action@v3
       with:
         push: true
-        tags: index.docker.io/${{ secrets.AzureAppService_ContainerUsername_933338511ad64267af4b9a11c7a07267 }}/library/ml_api-fastapi-app:${{ github.sha }}
+        tags: |
+          salesvictor/ml_api-fastapi-app:latest
+          salesvictor/ml_api-fastapi-app:${{ github.sha }}
         file: ./Dockerfile
 
   deploy:
@@ -48,4 +50,4 @@ jobs:
         app-name: 'ml-api'
         slot-name: 'production'
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_932399c608a64d6b9569e5983246b968 }}
-        images: 'index.docker.io/${{ secrets.AzureAppService_ContainerUsername_933338511ad64267af4b9a11c7a07267 }}/library/ml_api-fastapi-app:${{ github.sha }}'
+        images: 'salesvictor/ml_api-fastapi-app:${{ github.sha }}'
