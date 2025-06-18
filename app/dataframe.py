@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 # Uso da função
 symbol = "BTCUSDT"
-total_rows=2000
+total_rows=3000
 
 async def get_historical_data(interval: str):
     # interval = "1h"  # Intervalo de 1 hora
