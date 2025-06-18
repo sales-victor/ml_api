@@ -44,7 +44,10 @@ jobs:
 
       - name: Zip artifact for deployment
         run: |
-          zip -r release.zip . -x "antenv/*" ".git/*" "__pycache__/*" "*.pyc" "*.pyo" "*.pyd" ".github/*"
+          zip -r release.zip . \
+            -x "antenv/*" "antenv/**" "antenv/**.*" \
+            ".git/*" "__pycache__/*" "*.pyc" "*.pyo" "*.pyd" ".github/*"
+
 
             
       - name: Upload artifact for deployment jobs
@@ -70,6 +73,11 @@ jobs:
 
       - name: Unzip artifact for deployment
         run: unzip release.zip
+
+      - name: Clean up old files (optional)
+        run: |
+          echo "Cleaning up old site files..."
+          # Se quiser de fato limpar, usar 'az webapp delete' ou FTP/kudu script aqui
         
       # - name: 'Deploy to Azure Web App'
       #   uses: azure/webapps-deploy@v3
@@ -82,6 +90,6 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'api-predict-btc'
-          slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_A36E7B17F65C4CA2828E892A5C87E085 }}
           package: release.zip
+
