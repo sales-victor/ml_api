@@ -18,7 +18,7 @@ NUM_FEATURES = 50
 
 # Load the bundled RandomForestClassifier
 base_dir = os.path.dirname(os.path.abspath(__file__))
-model_path = os.path.join(base_dir, "randomforest_model2.pkl")
+model_path = os.path.join(base_dir, "random_forest.pkl")
 
 random_forest = joblib.load(model_path)
 

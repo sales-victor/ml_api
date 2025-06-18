@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y gcc
 
 # Instala dependências
 RUN pip install --upgrade pip
-RUN pip install --no-cache-dir tensorflow==2.13.0
+# RUN pip install --no-cache-dir tensorflow==2.13.0
 RUN pip install --no-cache-dir -r requirements.txt
 
 

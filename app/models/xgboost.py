@@ -1,6 +1,7 @@
 import joblib
 import pandas as pd
 import numpy as np
+from xgboost import XGBClassifier
 import io
 import os
 import base64
@@ -18,10 +19,12 @@ NUM_FEATURES = 50
 
 # Load the bundled RandomForestClassifier
 base_dir = os.path.dirname(os.path.abspath(__file__))
-model_path = os.path.join(base_dir, "xgboost_model2.pkl")
+model_path = os.path.join(base_dir, "xgb_model.bin")
 
-xgboost_model = joblib.load(model_path)
+xgboost_model = XGBClassifier()
+xgboost_model.load_model(model_path)
 
+# xgboost_model = joblib.load(model_path)
 # For generating true-up/down labels
 scaler_X = MinMaxScaler()
 scaler_close = MinMaxScaler()
