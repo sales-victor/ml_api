@@ -38,9 +38,6 @@ jobs:
         run: |
             zip -r release.zip . -x "*.git*" "*__pycache__*" "*.venv*" "*.github*" "*tests*" "*.DS_Store*" "venv/*"
             
-      - name: Enable logging (opcional)
-        run: az webapp log tail --name api-predict-btc --resource-group api-predict-btc_group
-
       - name: Upload artifact for deployment jobs
         uses: actions/upload-artifact@v4
         with:
@@ -66,6 +63,9 @@ jobs:
         run: unzip release.zip
 
       
+      - name: Enable logging (opcional)
+        run: az webapp log tail --name api-predict-btc --resource-group api-predict-btc_group
+        
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
